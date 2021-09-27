@@ -70,14 +70,23 @@ static int posix_timer_interval_stop(struct interval *interval)
     return 0;
 }
 
-static void timer_expired_handler(int sig, siginfo_t *si, void *uc)
+void timer_expired_handler(union sigval sv)
+{
+    struct posix_interval_priv *priv;
+
+    priv = sv.sival_ptr;
+
+    priv->cb(priv->cb_data);
+}
+/*
+static void timer_expired_handler(union sigval sval)
 {
     struct posix_interval_priv *priv;
 
     priv = ((union sigval)si->si_value).sival_ptr;
 
     priv->cb(priv->cb_data);
-}
+}*/
 
 static struct interval* posix_timer_interval_create(struct timer *timer, unsigned int interval_ms, timer_expired_cb cb, void *cb_data)
 {
@@ -105,18 +114,11 @@ static struct interval* posix_timer_interval_create(struct timer *timer, unsigne
     priv->interval.start = posix_timer_interval_start;
     priv->interval.stop = posix_timer_interval_stop;
 
-    sa.sa_flags = SA_SIGINFO;
-    sa.sa_sigaction = timer_expired_handler;
-    sigemptyset(&sa.sa_mask);
-    if (sigaction(SIGRTMIN, &sa, NULL) == -1){
-        printf("sigaction() failed\n");
-    }
-
     // create the timer
-    sev.sigev_notify = SIGEV_SIGNAL;
-    sev.sigev_signo = SIGRTMIN;
-    sev.sigev_value.sival_ptr = &priv->timerid;
-    sev.sigev_value = (union sigval)(void*)priv;
+    sev.sigev_notify = SIGEV_THREAD;
+    sev.sigev_notify_function = timer_expired_handler;
+    sev.sigev_value.sival_ptr = priv;
+    sev.sigev_notify_attributes = NULL;
     if (timer_create(CLOCK_REALTIME, &sev, &priv->timerid) == -1){
         printf("timer_create() failed\n");
     }
@@ -147,6 +149,7 @@ static struct timer* destroy(struct timer *timer)
         priv = list_entry(list_head(&timer_priv->timers), struct posix_interval_priv, node);
         list_remove(&priv->node);
         priv->interval.stop(&priv->interval);
+        timer_delete(priv->timerid);
         free(priv);
     }
 

@@ -124,7 +124,6 @@ static void scheduler_interval_expired(void *data)
 
     priv = data;
 
-    printf("executing tasks = %d\n", priv->executing_tasks);
     if (priv->executing_tasks++)
     {
         priv->timing_error_cb_fn(priv->timing_error_cb_data);
@@ -140,7 +139,6 @@ static void scheduler_interval_expired(void *data)
         }
     }
     priv->executing_tasks--;
-
 }
 
 struct scheduler* scheduler_create(struct scheduler_attr *attr)

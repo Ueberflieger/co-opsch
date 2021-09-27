@@ -45,7 +45,7 @@ void task_3(void *data)
 
 void timing_error(void *data)
 {
-    printf("timing error\n");
+    printf("timing error fn\n");
 }
 
 int main(void)
@@ -78,17 +78,18 @@ int main(void)
     }
 
     int i = 0, j = 100, k = 10;
+    int task_3_added = 0;
     scheduler->task_add(scheduler, task_1, &i);
     scheduler->task_add(scheduler, task_2, &j);
 
     scheduler->start(scheduler);
 
     while (i < 10){
-        sleep(10);
-        if (i == 5){
+        usleep(1000);
+        if (i == 5 && task_3_added == 0){
             scheduler->task_add(scheduler, task_3, &k);
+            task_3_added = 1;
         }
-        printf("\n");
     }
 
     scheduler->destroy(scheduler);
