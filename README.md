@@ -1,2 +1,2 @@
-# co-opsch
+# coops
 Implementation of a cooperative scheduler.
