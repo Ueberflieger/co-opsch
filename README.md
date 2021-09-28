@@ -17,6 +17,7 @@ object has to implement the `timer` interface. The implementation of the
 Example (return value checking omitted):
 ```c
 #include <stdio.h>
+#include <unistd.h>
 
 #include "timer.h"
 #include "posix_timer.h"
@@ -38,27 +39,28 @@ int main(void)
     struct scheduler *scheduler;
     struct scheduler_attr *attr;
     struct timer *timer;
-    
+
     timer = posix_timer_create();
-    
-    attr = schedulder_attr_create();
-    
+
+    attr = scheduler_attr_create();
+
     scheduler_attr_interval_ms_set(attr, 50);
     scheduler_attr_timer_set(attr, timer);
-    
+
     scheduler = scheduler_create(attr);
-    
+
     scheduler->task_add(scheduler, task_1, NULL);
     scheduler->task_add(scheduler, task_2, NULL);
 
+    scheduler->start(scheduler);
+
     while (1)
     {
-        sleep(1)
+        sleep(1);
     }
 
-    scheduler->stop(sch);
+    scheduler->stop(scheduler);
 
     scheduler = scheduler->destroy(scheduler);
 }
 ```
-
