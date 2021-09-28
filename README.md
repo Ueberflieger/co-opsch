@@ -1,6 +1,6 @@
 # coops
 
-`coops` is a simple platform independent *coop*erative *s*cheduler for small
+`coops` is a simple platform independent **coop**erative **s**cheduler for small
 embedded systems.
 
 ## How to use?
